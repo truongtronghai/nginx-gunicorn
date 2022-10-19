@@ -1,0 +1,32 @@
+When running gunicorn, binding it with 0.0.0.0:<port> in order to expose port to outside. If not, the loopback IP (127.0.0.1 or localhost) is used.
+This makes gunicorn container cannot be accessed from Nginx reverse proxy.
+
+Must change ALLOWED_HOSTS of Django to '*' so that Django will not cancel passed requests form Nginx.
+
+Template of a Nginx configuration file for reverse proxy:
+
+# this is simple version of conf file for Nginx working with Gunicorn
+
+upstream webapp{
+  server gunicorndjnet:8000 # this is an alias of container in network
+}
+server {
+    # use 'listen 80 deferred;' for Linux
+    # use 'listen 80 accept_filter=httpready;' for FreeBSD
+    listen 80 default_server;
+    client_max_body_size 4G;
+
+    # set the correct host(s) for your site
+    server_name example.com www.example.com;
+
+    keepalive_timeout 5;
+
+    # path for static files
+    root /djapp/static;
+
+    location / {
+      # checks for static file, if not found proxy to app
+        proxy_pass http://webapp/;
+    }
+
+}

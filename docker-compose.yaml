@@ -1,0 +1,25 @@
+version: "3.8"
+
+services:
+  wsnginx:
+    image: wsnginx
+    ports:
+      - "9000:80"
+    container_name: nginxdj
+    networks:
+      network1:
+        
+    links:
+      - gunicorndjnet
+    
+  gunicorndjnet:
+    image: gunicorn-django
+    ports:
+      - "9001:8000"
+    container_name: gunicorndjnet
+    networks:
+      network1:
+
+networks:
+  network1:
+    name: network4dj
